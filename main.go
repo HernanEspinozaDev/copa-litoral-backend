@@ -79,7 +79,7 @@ func main() {
 
 	// Crear servidor HTTP
 	server := &http.Server{
-		Addr:         ":" + fmt.Sprintf("%d", cfg.APIPort),
+		Addr:         ":" + cfg.APIPort,
 		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -98,7 +98,7 @@ func main() {
 	go func() {
 		utils.LogInfo("Servidor iniciando", map[string]interface{}{
 			"port": cfg.APIPort,
-			"url":  fmt.Sprintf("http://localhost:%d", cfg.APIPort),
+			"url":  fmt.Sprintf("http://localhost:%s", cfg.APIPort),
 		})
 		
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
