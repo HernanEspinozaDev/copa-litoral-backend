@@ -18,7 +18,7 @@ func SetupRoutes(db *sql.DB, cfg *config.Config) *mux.Router {
 
 	// Middlewares globales básicos
 	r.Use(middlewares.CORS(strings.Split(cfg.CORSAllowedOrigins, ",")))
-	r.Use(middlewares.HTTPSRedirectMiddleware(cfg))
+	// r.Use(middlewares.HTTPSRedirectMiddleware(cfg)) // Comentado: Nginx Proxy Manager maneja HTTPS
 	r.Use(utils.LoggingMiddleware())
 	r.Use(utils.MetricsMiddleware())
 	r.Use(middlewares.RateLimitMiddleware(middlewares.NewRateLimiter(100, 1)))
