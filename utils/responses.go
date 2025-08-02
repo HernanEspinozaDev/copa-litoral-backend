@@ -111,7 +111,7 @@ func NewResponseManager(includeStackTrace, includeRequestID bool) *ResponseManag
 	rm := &ResponseManager{
 		includeStackTrace: includeStackTrace,
 		includeRequestID:  includeRequestID,
-		defaultMessages:   make(map[string]string),
+		defaultMessages:   make(map[ErrorCode]string),
 	}
 	
 	rm.setupDefaultMessages()
