@@ -21,7 +21,7 @@ type DBPool struct {
 
 // NewDBPool crea un nuevo pool de conexiones con configuración optimizada
 func NewDBPool(cfg *config.Config) (*DBPool, error) {
-	logger := utils.GetLogger()
+	logger := utils.Logger
 	
 	// Construir string de conexión
 	connStr := fmt.Sprintf(

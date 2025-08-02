@@ -42,7 +42,11 @@ func SetupTestDB() *TestConfig {
 	}
 
 	// Conectar a la base de datos de pruebas
-	db, err := database.Connect(cfg)
+	dbPool, err := database.NewDBPool(cfg)
+	if err != nil {
+		log.Fatalf("Failed to create database pool: %v", err)
+	}
+	db := dbPool.DB
 	if err != nil {
 		log.Fatalf("Failed to connect to test database: %v", err)
 	}

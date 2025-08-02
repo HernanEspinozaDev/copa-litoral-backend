@@ -21,7 +21,7 @@ type TxManager struct {
 func NewTxManager(db *sql.DB) *TxManager {
 	return &TxManager{
 		db:     db,
-		logger: utils.GetLogger(),
+		logger: utils.Logger,
 	}
 }
 
@@ -115,7 +115,7 @@ func (tm *TxManager) WithTransactionAndOptions(ctx context.Context, opts *TxOpti
 	tm.logger.WithField("duration", duration).Debug("Transaction committed successfully")
 
 	// Actualizar métricas
-	utils.RecordDBQuery("transaction", duration, err == nil)
+	utils.RecordDBQuery("transaction", "database", duration)
 
 	return nil
 }

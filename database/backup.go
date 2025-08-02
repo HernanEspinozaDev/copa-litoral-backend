@@ -38,7 +38,7 @@ func NewBackupManager(cfg *config.Config, backupDir string) *BackupManager {
 
 	return &BackupManager{
 		config:    cfg,
-		logger:    utils.GetLogger(),
+		logger:    utils.Logger,
 		backupDir: backupDir,
 	}
 }
@@ -120,7 +120,7 @@ func (bm *BackupManager) CreateBackup(opts *BackupOptions) (string, error) {
 	}
 
 	// Registrar métrica
-	utils.RecordDBQuery("backup", duration, true)
+	utils.RecordDBQuery("backup", "database", duration)
 
 	return backupPath, nil
 }

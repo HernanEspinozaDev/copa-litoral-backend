@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"fmt"
 	"testing"
 
 	"copa-litoral-backend/tests"
@@ -321,7 +322,7 @@ func TestConnectionPooling(t *testing.T) {
 				}
 				
 				if result != id {
-					errors <- testing.ErrExample
+					errors <- fmt.Errorf("expected %d, got %d", id, result)
 					return
 				}
 			}(i)

@@ -16,7 +16,6 @@ import (
 	"copa-litoral-backend/utils"
 
 	_ "github.com/lib/pq"
-	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -75,11 +74,8 @@ func main() {
 		"max_idle_conns": cfg.DBMaxIdleConns,
 	})
 
-	// Crear router
-	router := mux.NewRouter()
-
 	// Configurar rutas
-	routes.SetupRoutes(router, cfg)
+	router := routes.SetupRoutes(db, cfg)
 
 	// Crear servidor HTTP
 	server := &http.Server{

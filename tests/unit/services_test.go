@@ -1,6 +1,7 @@
 package unit
 
 import (
+	"fmt"
 	"testing"
 
 	"copa-litoral-backend/tests/mocks"
@@ -123,7 +124,7 @@ func TestJugadorService(t *testing.T) {
 
 	t.Run("service error handling", func(t *testing.T) {
 		// Set error for CreateJugador
-		mockService.SetError("CreateJugador", testing.ErrExample)
+		mockService.SetError("CreateJugador", fmt.Errorf("mock error for CreateJugador"))
 
 		_, err := mockService.CreateJugador(map[string]interface{}{
 			"nombre": "Test",
@@ -180,7 +181,7 @@ func TestAuthService(t *testing.T) {
 	})
 
 	t.Run("auth service error handling", func(t *testing.T) {
-		mockService.SetError("Login", testing.ErrExample)
+		mockService.SetError("Login", fmt.Errorf("mock error for Login"))
 
 		_, err := mockService.Login("testuser", "testpass")
 		if err == nil {
@@ -213,7 +214,7 @@ func TestEmailService(t *testing.T) {
 	})
 
 	t.Run("email service error handling", func(t *testing.T) {
-		mockService.SetError("SendEmail", testing.ErrExample)
+		mockService.SetError("SendEmail", fmt.Errorf("mock error for SendEmail"))
 
 		err := mockService.SendEmail("test@example.com", "Subject", "Body")
 		if err == nil {
@@ -263,7 +264,7 @@ func TestHTTPClient(t *testing.T) {
 	})
 
 	t.Run("HTTP request error", func(t *testing.T) {
-		mockClient.SetError("http://error.com", testing.ErrExample)
+		mockClient.SetError("http://error.com", fmt.Errorf("mock error for http://error.com"))
 
 		_, err := mockClient.Get("http://error.com")
 		if err == nil {

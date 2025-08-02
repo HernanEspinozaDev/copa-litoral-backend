@@ -36,7 +36,7 @@ func NewMigrationManager(db *sql.DB, migrationsPath string) *MigrationManager {
 	return &MigrationManager{
 		db:             db,
 		migrationsPath: migrationsPath,
-		logger:         utils.GetLogger(),
+		logger:         utils.Logger,
 	}
 }
 
