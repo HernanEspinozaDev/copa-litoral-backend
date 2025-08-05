@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"copa-litoral-backend/config"
+	"copa-litoral-backend/database"
 	"copa-litoral-backend/routes"
 	"copa-litoral-backend/utils"
 
@@ -39,20 +40,23 @@ func main() {
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName,
 	)
-	
+
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		utils.LogError("Failed to open database connection", err, nil)
 		return
 	}
 	defer db.Close()
-	
+
+	// Asignar la conexión global para los servicios
+	database.DB = db
+
 	// Configurar pool de conexiones
 	db.SetMaxOpenConns(cfg.DBMaxOpenConns)
 	db.SetMaxIdleConns(cfg.DBMaxIdleConns)
 	db.SetConnMaxLifetime(time.Duration(cfg.DBConnMaxLifetime) * time.Minute)
 	db.SetConnMaxIdleTime(time.Duration(cfg.DBConnMaxIdleTime) * time.Minute)
-	
+
 	// Verificar conexión
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -60,15 +64,15 @@ func main() {
 		utils.LogError("Failed to ping database", err, nil)
 		return
 	}
-	
+
 	// Ejecutar migraciones si están habilitadas
 	if err := runMigrations(db); err != nil {
 		utils.LogError("Failed to run migrations", err, nil)
 	}
-	
+
 	// Configurar health checks con la conexión de base de datos
 	utils.SetGlobalDB(db)
-	
+
 	utils.LogInfo("Database connection pool configured", map[string]interface{}{
 		"max_open_conns": cfg.DBMaxOpenConns,
 		"max_idle_conns": cfg.DBMaxIdleConns,
@@ -87,7 +91,7 @@ func main() {
 	}
 
 	utils.LogInfo("Servidor configurado", map[string]interface{}{
-		"port":         cfg.APIPort,
+		"port":        cfg.APIPort,
 		"environment": cfg.Environment,
 	})
 
@@ -100,7 +104,7 @@ func main() {
 			"port": cfg.APIPort,
 			"url":  fmt.Sprintf("http://localhost:%s", cfg.APIPort),
 		})
-		
+
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			serverErrors <- err
 		}
@@ -148,23 +152,23 @@ func runMigrations(db *sql.DB) error {
 		name VARCHAR(255) NOT NULL,
 		applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);`
-	
+
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("failed to create migrations table: %w", err)
 	}
-	
+
 	// Verificar si la migración inicial ya fue aplicada
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM schema_migrations WHERE version = 1").Scan(&count)
 	if err != nil {
 		return fmt.Errorf("failed to check migration status: %w", err)
 	}
-	
+
 	if count > 0 {
 		utils.LogInfo("Migrations already applied", nil)
 		return nil
 	}
-	
+
 	// Aplicar migración inicial básica (crear tablas principales si no existen)
 	initialMigration := `
 	-- Tabla para las categorías
@@ -205,27 +209,27 @@ func runMigrations(db *sql.DB) error {
 	CREATE INDEX IF NOT EXISTS idx_jugadores_categoria ON jugadores (categoria_id);
 	CREATE INDEX IF NOT EXISTS idx_usuarios_jugador ON usuarios (jugador_id);
 	`
-	
+
 	// Ejecutar migración en transacción
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin migration transaction: %w", err)
 	}
 	defer tx.Rollback()
-	
+
 	if _, err := tx.Exec(initialMigration); err != nil {
 		return fmt.Errorf("failed to execute initial migration: %w", err)
 	}
-	
+
 	// Registrar migración como aplicada
 	if _, err := tx.Exec("INSERT INTO schema_migrations (version, name) VALUES (1, 'initial_schema')"); err != nil {
 		return fmt.Errorf("failed to record migration: %w", err)
 	}
-	
+
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("failed to commit migration: %w", err)
 	}
-	
+
 	utils.LogInfo("Initial migration applied successfully", nil)
 	return nil
 }

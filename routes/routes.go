@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 
+	"copa-litoral-backend/services"
+
 	"github.com/gorilla/mux"
 
 	"copa-litoral-backend/config"
@@ -28,8 +30,9 @@ func SetupRoutes(db *sql.DB, cfg *config.Config) *mux.Router {
 		utils.RespondWithJSON(w, http.StatusOK, map[string]string{"status": "healthy"})
 	}).Methods("GET")
 
-	// Inicializar handlers
-	authHandler := handlers.NewAuthHandler(nil, cfg) // TODO: Inject proper service
+	// Inicializar servicios y handlers
+	authService := services.NewAuthService(cfg)
+	authHandler := handlers.NewAuthHandler(authService, cfg)
 
 	// Rutas públicas básicas
 	public := r.PathPrefix("/api/v1").Subrouter()
